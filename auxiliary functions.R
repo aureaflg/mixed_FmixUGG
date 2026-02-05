@@ -168,13 +168,12 @@ registerDistributions(list(
 extract_param <- function(samples_matrix, 
                           param_name, 
                           dims) {
-  # Filtrar colunas que correspondem ao parâmetro
+  
   param_cols <- grep(paste0("^", param_name, "\\["), 
                      colnames(samples_matrix))
   param_data <- samples_matrix[, param_cols, 
                                drop = FALSE]
-  
-  # Extrair os índices dos parâmetros: de "param[2,3]" → c(2,3)
+
   index_matrix <- do.call(rbind, lapply(
     colnames(param_data),
     function(n) as.integer(
@@ -183,7 +182,7 @@ extract_param <- function(samples_matrix,
   
   n_iter <- nrow(param_data)
   full_dims <- c(n_iter, dims)
-  param_array <- array(NA, dim = full_dims)  # [n_iter x dim1 x dim2 ...]
+  param_array <- array(NA, dim = full_dims) 
   
   for (k in seq_len(ncol(param_data))) {
     idx <- index_matrix[k, ]
@@ -254,7 +253,6 @@ extract_all_params <- function(mod) {
 summarize_param <- function(samples_matrix, param_name = "beta", thetas_array = NULL) {
   dims <- dim(samples_matrix)
   
-  # Detecta se tem 2 ou 3 dimensões
   if (length(dims) == 3) {
     n_samples <- dims[1]
     n_params <- dims[2]
@@ -263,7 +261,7 @@ summarize_param <- function(samples_matrix, param_name = "beta", thetas_array = 
     n_samples <- dims[1]
     n_params <- 1
     n_components <- dims[2]
-    # Converte 2D para 3D: [samples, params, components]
+
     samples_matrix <- array(samples_matrix, dim = c(n_samples, n_params, n_components))
   } else {
     stop("Array must be 2D or 3D")
@@ -272,14 +270,14 @@ summarize_param <- function(samples_matrix, param_name = "beta", thetas_array = 
   df_list <- list()
   
   for (k in 1:n_components) {
-    # Filtra componentes pelo theta se thetas_array existir
+    
     if (!is.null(thetas_array)) {
       theta_mean <- mean(thetas_array[, k])
       if (theta_mean <= 0.1) next
     }
     
     for (j in 1:n_params) {
-      param_samples <- samples_matrix[, j, k]  # samples first
+      param_samples <- samples_matrix[, j, k] 
       HPD <- HPDinterval(as.mcmc(param_samples))
       
       name <- switch(param_name,
@@ -321,34 +319,13 @@ extract_classes_filtered <- function(mod, threshold = 0.1){
        valid_comps = valid_comps)
 }
 
-# relabel_by_theta <- function(class_list){
-#   # extrai classes e thetas
-#   class_vec <- class_list$class
-#   theta_means <- class_list$thetas
-#   
-#   # identifica apenas componentes "válidas"
-#   valid_comps <- which(theta_means > 0.1)
-#   
-#   # ordena as componentes válidas pelo valor de theta
-#   ordem <- order(theta_means[valid_comps], decreasing=TRUE)  # crescente; use decreasing=TRUE se preferir
-#   nova_ordem <- valid_comps[ordem]
-#   
-#   # cria um mapa: componente antiga -> nova etiqueta sequencial (1, 2, 3, ...)
-#   mapa <- setNames(seq_along(nova_ordem), nova_ordem)
-#   
-#   # aplica o mapa ao vetor de classes
-#   class_vec_rerot <- ifelse(class_vec %in% valid_comps, mapa[as.character(class_vec)], NA)
-#   
-#   list(class = class_vec_rerot, thetas = theta_means[nova_ordem])
-# }
-
 
 #########################
 ####### Residuals #######
 #########################
 
 simulate_dharma_posterior_mean <- function(mod,
-    n_sims = 1000        # número de simulações a realizar
+    n_sims = 1000 
 ) {
   
   y_obs=mod$y
@@ -360,7 +337,6 @@ simulate_dharma_posterior_mean <- function(mod,
   samples_matrix=as.matrix(mod$samples)
   
   
-  # Extrair médias a posteriori dos parâmetros
   param_mean     <- apply(
     extract_param(samples_matrix, "param", 
                   c(p, k)), c(2,3), mean)
@@ -434,21 +410,18 @@ plot_qq_simple_dharma <- function(scaled_residuals) {
   
   scaled_residuals <- na.omit(scaled_residuals)
   n_obs <- length(scaled_residuals)
-  # Quantis teóricos da U(0,1)
+
   qq_vals <- ppoints(n_obs)
   
-  # Data frame para ggplot
   qq_df <- data.frame(
     theoretical = qq_vals,
     residuals = sort(scaled_residuals)
   )
   
-  # QQ-plot simples
   ggplot(qq_df, aes(x = theoretical, y = residuals)) +
     geom_point(alpha = 0.7) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
     labs(
-      #title = "QQ-Plot dos Resíduos Escalados",
       x = "Theoretical Quantiles U(0,1)",
       y = "Scaled Residuals"
     ) +
@@ -681,6 +654,7 @@ calc_criteria <- function(mod) {
     DIC  = DIC
   )
 }
+
 
 
 
