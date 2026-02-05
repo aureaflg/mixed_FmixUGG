@@ -171,21 +171,7 @@ classification <- function(mod, threshold = 0.1){
       theta_val,
     check.names = FALSE
   )
-  
-  # class_r <- relabel_by_theta(class)
-  # k <- length(class_r$thetas)
-  # 
-  # yclass <- class_r$class
-  # 
-  # prop_obs <- prop.table(table(factor(yclass, levels = 1:k)))
-  # 
-  # proportion <- data.frame(
-  #   Component = paste("Component", 1:k),
-  #   "Proportion of Observations Assigned to Component" = as.numeric(prop_obs),
-  #   "Estimated mixing weight" = class_r$thetas,
-  #   check.names = FALSE
-  # )
-  
+   
   list(
     proportion = proportion,
     "classification of observations" = yclass
@@ -246,3 +232,4 @@ information_criteria=function(mod){
     caption = "Information Criteria"
   )
 }
+
